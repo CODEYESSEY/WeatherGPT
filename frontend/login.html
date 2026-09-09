@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherGPT - Conversational Weather & Climate Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #090B10;
+            --card-bg: rgba(18, 22, 33, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-accent: #4F46E5;
+            --primary-blue: #3B82F6;
+            --btn-hover: #4338CA;
+            --text-main: #FFFFFF;
+            --text-muted: #9CA3AF;
+            --text-dim: #6B7280;
+            --input-bg: rgba(15, 20, 30, 0.6);
+            --input-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* --- Main Container --- */
+        .app-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 3.5rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        /* --- Left Column Content --- */
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .brand-logo-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+
+        .brand-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-title h1 span {
+            color: #818CF8;
+        }
+
+        .brand-title p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+
+        .hero-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title .highlight {
+            background: linear-gradient(90deg, #A78BFA, #60A5FA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-description {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Feature Cards Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .feature-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.5rem;
+        }
+
+        .feature-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #818CF8;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .feature-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            color: #F3F4F6;
+        }
+
+        .feature-info p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        /* Security Banner */
+        .security-banner {
+            background: rgba(16, 24, 39, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .security-icon {
+            color: #34D399;
+            font-size: 1.25rem;
+        }
+
+        .security-text p {
+            font-size: 0.825rem;
+            color: var(--text-muted);
+        }
+
+        .security-text p span {
+            color: #34D399;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* --- Right Column: Auth Card --- */
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header Tabs */
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem 0;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            color: var(--text-main);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .auth-welcome {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-welcome h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .auth-welcome p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            color: #D1D5DB;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i.left-icon {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .input-wrapper i.toggle-pwd {
+            position: absolute;
+            right: 1rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-blue);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .remember-me input {
+            accent-color: var(--primary-accent);
+            border-radius: 4px;
+        }
+
+        .forgot-pass {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .forgot-pass:hover {
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .btn-primary {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(90deg, #4F46E5, #3B82F6);
+            border: none;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.92;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .divider span {
+            padding: 0 0.75rem;
+        }
+
+        /* Social Logins */
+        .social-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-social {
+            padding: 0.65rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-social:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Footer Switch Box */
+        .auth-toggle-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-text p {
+            font-size: 0.825rem;
+            color: var(--text-muted);
+        }
+
+        .btn-secondary-link {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 0.825rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-secondary-link:hover {
+            color: var(--primary-blue);
+        }
+
+        /* --- Footer Bottom Bar --- */
+        .footer-bar {
+            border-top: 1px solid var(--card-border);
+            background: rgba(9, 11, 16, 0.8);
+            padding: 1.25rem 2rem;
+        }
+
+        .footer-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .footer-icon {
+            color: var(--primary-blue);
+            font-size: 1.1rem;
+        }
+
+        .footer-info h5 {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .footer-info p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* Hidden Class for Tab Switch */
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+            .footer-inner {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-inner {
+                grid-template-columns: 1fr;
+            }
+            .social-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="app-container">
+        <section class="info-section">
+            <div class="brand-header">
+                <div class="brand-logo-icon">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <div class="brand-title">
+                    <h1>Weather<span>GPT</span></h1>
+                    <p>Conversational Weather & Climate Intelligence</p>
+                </div>
+            </div>
+
+            <h2 class="hero-title">
+                AI-Powered Weather Intelligence<br>
+                <span class="highlight">for a Safer, Smarter Tomorrow</span>
+            </h2>
+
+            <p class="hero-description">
+                Get real-time weather updates, early warnings, agricultural advisories, disaster alerts, and smart decision support — all in your language.
+            </p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fa-regular fa-comment-dots"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h4>AI Weather Assistant</h4>
+                        <p>Ask anything in natural language or voice</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h4>Interactive Maps</h4>
+                        <p>Live radar, satellite, wind & hazard visualization</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fa-regular fa-bell"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h4>Real-Time Alerts</h4>
+                        <p>Storm, flood, heatwave & extreme weather warnings</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h4>Multi-Language Support</h4>
+                        <p>English, Hindi, Bengali and more for every user</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h4>Agricultural Advisory</h4>
+                        <p>Crop-based farming guidance using live weather insights</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h4>Trusted & Accurate</h4>
+                        <p>Data from IMD, ECMWF, GFS & other official sources</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="security-banner">
+                <i class="fa-solid fa-shield-check security-icon"></i>
+                <div class="security-text">
+                    <p>Your data is secure with enterprise-grade encryption and privacy-first architecture.</p>
+                    <span>We never share your personal data.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="auth-card">
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+                <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+
+            <div id="login-form-section" class="form-section active">
+                <div class="auth-welcome">
+                    <h2>Welcome back! 👋</h2>
+                    <p>Login to continue your weather intelligence journey.</p>
+                </div>
+
+                <form onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label class="form-label">Email or Phone Number</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope left-icon"></i>
+                            <input type="text" class="form-input" placeholder="Enter your email or phone number" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock left-icon"></i>
+                            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
+                            <i class="fa-regular fa-eye toggle-pwd" onclick="togglePassword('login-password', this)"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <label class="remember-me">
+                            <input type="checkbox" checked> Remember me
+                        </label>
+                        <a href="#" class="forgot-pass">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        Login to WeatherGPT <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>OR CONTINUE WITH</span>
+                </div>
+
+                <div class="social-grid">
+                    <button class="btn-social">
+                        <i class="fa-brands fa-google" style="color: #EA4335;"></i> Google
+                    </button>
+                    <button class="btn-social">
+                        <i class="fa-brands fa-microsoft" style="color: #00A4EF;"></i> Microsoft
+                    </button>
+                    <button class="btn-social">
+                        <i class="fa-brands fa-github"></i> GitHub
+                    </button>
+                    <button class="btn-social">
+                        <i class="fa-solid fa-mobile-screen-button"></i> Phone OTP
+                    </button>
+                </div>
+
+                <div class="auth-toggle-box">
+                    <div class="toggle-text">
+                        <p>New here?</p>
+                        <p style="color: var(--text-dim); font-size: 0.75rem;">Create an account to unlock all features.</p>
+                    </div>
+                    <button class="btn-secondary-link" onclick="switchTab('signup')">
+                        Create Account <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="signup-form-section" class="form-section">
+                <div class="auth-welcome">
+                    <h2>Get Started Free! ⚡</h2>
+                    <p>Create your account for personalized climate intelligence.</p>
+                </div>
+
+                <form onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-user left-icon"></i>
+                            <input type="text" class="form-input" placeholder="Enter your full name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope left-icon"></i>
+                            <input type="email" class="form-input" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock left-icon"></i>
+                            <input type="password" id="signup-password" class="form-input" placeholder="Create a strong password" required>
+                            <i class="fa-regular fa-eye toggle-pwd" onclick="togglePassword('signup-password', this)"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="margin-top: 1.5rem;">
+                        Create Your Account <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>OR REGISTER WITH</span>
+                </div>
+
+                <div class="social-grid">
+                    <button class="btn-social">
+                        <i class="fa-brands fa-google" style="color: #EA4335;"></i> Google
+                    </button>
+                    <button class="btn-social">
+                        <i class="fa-brands fa-github"></i> GitHub
+                    </button>
+                </div>
+
+                <div class="auth-toggle-box">
+                    <div class="toggle-text">
+                        <p>Already have an account?</p>
+                    </div>
+                    <button class="btn-secondary-link" onclick="switchTab('login')">
+                        Login Now <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-bar">
+        <div class="footer-inner">
+            <div class="footer-item">
+                <i class="fa-solid fa-rotate footer-icon"></i>
+                <div class="footer-info">
+                    <h5>Real-Time Updates</h5>
+                    <p>Live data, updated every minute</p>
+                </div>
+            </div>
+
+            <div class="footer-item">
+                <i class="fa-solid fa-triangle-exclamation footer-icon" style="color: #F59E0B;"></i>
+                <div class="footer-info">
+                    <h5>Early Warnings</h5>
+                    <p>Alerts before disaster strikes</p>
+                </div>
+            </div>
+
+            <div class="footer-item">
+                <i class="fa-solid fa-brain footer-icon" style="color: #A855F7;"></i>
+                <div class="footer-info">
+                    <h5>Decision Intelligence</h5>
+                    <p>AI-driven insights & recommendations</p>
+                </div>
+            </div>
+
+            <div class="footer-item">
+                <i class="fa-solid fa-users footer-icon" style="color: #10B981;"></i>
+                <div class="footer-info">
+                    <h5>For Everyone</h5>
+                    <p>Farmers, travelers, planners & all</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function switchTab(tab) {
+            const loginSection = document.getElementById('login-form-section');
+            const signupSection = document.getElementById('signup-form-section');
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+
+            if (tab === 'login') {
+                loginSection.classList.add('active');
+                signupSection.classList.remove('active');
+                tabLogin.classList.add('active');
+                tabSignup.classList.remove('active');
+            } else {
+                signupSection.classList.add('active');
+                loginSection.classList.remove('active');
+                tabSignup.classList.add('active');
+                tabLogin.classList.remove('active');
+            }
+        }
+
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>
