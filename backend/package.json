@@ -4,5 +4,17 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1"
+  },
+  "scripts": {
+    "start": "node server.js",
+      "build": "echo 'No build required'"
+    }
+    
+
   }
-}
+  
+
+
+
+
+
