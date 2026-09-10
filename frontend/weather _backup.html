@@ -2384,53 +2384,29 @@ Reason:
 `;
 
             try {
-
-                console.log("========== GEMINI TEST ==========");
-                console.log("Sending prompt to backend...");
-                console.log(prompt);
-
-                const response = await fetch(
-                    'http://localhost:3001/api/gemini',
-                    {
+                let response;
+                try {
+                    response = await fetch('/api/gemini', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            prompt: prompt
-                        })
-                    }
-                );
-
-                console.log("Backend HTTP status:", response.status);
-
-                const data = await response.json();
-
-                console.log("Backend response:", data);
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.error || `HTTP ${response.status}`
-                    );
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt })
+                    });
+                } catch (e) {
+                    response = await fetch('http://localhost:3001/api/gemini', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt })
+                    });
                 }
 
-                if (!data.text) {
-                    throw new Error("Backend returned no AI text");
+                if (response && response.ok) {
+                    const data = await response.json();
+                    if (data && data.text) return data.text;
                 }
-
-                console.log("✅ GEMINI RESPONSE:", data.text);
-
-                return data.text;
-
+                return buildOfflineResponse(query, loc);
             } catch (err) {
-
-                console.error("❌ GEMINI ERROR:", err);
-
-                return `Gemini Error:
-
-${err.message}
-
-Please check the browser console and backend terminal.`;
+                console.warn("Using offline synthesis fallback:", err);
+                return buildOfflineResponse(query, loc);
             }
         }
 
